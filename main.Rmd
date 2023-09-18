@@ -1,0 +1,60 @@
+---
+title: "Airbnb Pricing Analysis in Europe"
+author: "Yacine Montacer"
+date: "08/05/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+For my end of studies mini-senior project, I found a dataset containing Airbnb rental data for European cities for over 51,000 listings. The dataset includes features such as the total listing price, room type, host status, amenities and location information which can be exploited to analyze these factors' relation to the Airbnb prices. For more information see: <https://www.kaggle.com/datasets/thedevastator/airbnb-price-determinants-in-europe?resource=download>
+
+Let's start by importing our dataset:
+
+```{r importation}
+file_path <- "data/amsterdam_weekdays.csv"
+amsterdam_weekday_data <- read.csv(file_path, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+
+#display first lines of data 
+head(amsterdam_weekday_data, 5)
+```
+
+Now let's include the libraries we need to move forward: 
+
+```{r libraries}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+Now let's proceed with exploratory data analysis: 
+
+```{r exploratory analysis}
+# Summary statistics
+summary(amsterdam_weekday_data)
+
+# Histogram of price
+ggplot(amsterdam_weekday_data, aes(x = realSum)) +
+  geom_histogram(fill = "steelblue", bins = 30) +
+  labs(x = "Price", y = "Frequency", title = "Distribution of Prices")
+
+# Boxplot of price by room type
+ggplot(amsterdam_weekday_data, aes(x = room_type, y = realSum)) +
+  geom_boxplot(fill = "steelblue") +
+  labs(x = "Room Type", y = "Price", title = "Price Variation by Room Type")
+
+# Scatterplot of price vs. distance to metro
+ggplot(amsterdam_weekday_data, aes(x = metro_dist, y = realSum)) +
+  geom_point(color = "steelblue") +
+  labs(x = "Distance to Metro", y = "Price", title = "Price vs. Distance to Metro")
+
+# Correlation matrix
+cor_matrix <- cor(amsterdam_weekday_data[, c("realSum", "person_capacity", "cleanliness_rating", "guest_satisfaction_overall", "bedrooms", "dist", "metro_dist")])
+cor_matrix
+```
+
+
