@@ -53,7 +53,7 @@ ggplot(amsterdam_weekday_data, aes(x = metro_dist, y = realSum)) +
   labs(x = "Distance to Metro", y = "Price", title = "Price vs. Distance to Metro")
 ```
 
-let's import additional libraries and proceed with a correlation matrix
+let's import additional libraries and proceed with a correlation matrix:
 
 ```{r correlation matrix}
 # Load the necessary libraries
@@ -62,10 +62,29 @@ library(readr)
 library(corrplot)
 
 # Correlation matrix
-cor_matrix <- cor(amsterdam_weekday_data[, c("realSum", "person_capacity", "cleanliness_rating", "guest_satisfaction_overall", "bedrooms", "dist", "metro_dist", "rest_index", "attr_index")])
+cor_matrix <- cor(amsterdam_weekday_data[, c("realSum", "person_capacity", "cleanliness_rating", "guest_satisfaction_overall", "bedrooms", "dist", "metro_dist", "rest_index", "attr_index", "rest_index_norm", "attr_index_norm", "lng", "lat", "biz")])
 cor_matrix
 
 # Visualize the correlation matrix
-corrplot(cor_matrix, method = "color")
+corrplot(cor_matrix, method = "color", type = "upper", order = "hclust")
+```
+Seeing the variables that correlate with the price, we can try to create a linear regression model: 
+
+```{r lm}
+library(tidyverse)
+library(caret)
+
+#model
+lm_model <- lm(realSum ~ person_capacity + bedrooms + attr_index_norm + rest_index_norm + guest_satisfaction_overall + dist + metro_dist, data = amsterdam_weekday_data)
+
+#summarize LM model
+summary(lm_model)
+
+# Test the model on new data
+new_data <- data.frame(person_capacity = 4, bedrooms = 2, attr_index_norm = 0.8, rest_index_norm = 0.6, guest_satisfaction_overall = 4.5, dist = 10, metro_dist = 5)
+predicted_realSum <- predict(lm_model, newdata = new_data)
+
+# Print the predicted realSum
+print(predicted_realSum)
 ```
 
