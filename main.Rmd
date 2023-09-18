@@ -51,10 +51,21 @@ ggplot(amsterdam_weekday_data, aes(x = room_type, y = realSum)) +
 ggplot(amsterdam_weekday_data, aes(x = metro_dist, y = realSum)) +
   geom_point(color = "steelblue") +
   labs(x = "Distance to Metro", y = "Price", title = "Price vs. Distance to Metro")
-
-# Correlation matrix
-cor_matrix <- cor(amsterdam_weekday_data[, c("realSum", "person_capacity", "cleanliness_rating", "guest_satisfaction_overall", "bedrooms", "dist", "metro_dist")])
-cor_matrix
 ```
 
+let's import additional libraries and proceed with a correlation matrix
+
+```{r correlation matrix}
+# Load the necessary libraries
+library(dplyr)
+library(readr)
+library(corrplot)
+
+# Correlation matrix
+cor_matrix <- cor(amsterdam_weekday_data[, c("realSum", "person_capacity", "cleanliness_rating", "guest_satisfaction_overall", "bedrooms", "dist", "metro_dist", "rest_index", "attr_index")])
+cor_matrix
+
+# Visualize the correlation matrix
+corrplot(cor_matrix, method = "color")
+```
 
