@@ -365,7 +365,8 @@ listings. The dataset includes features such as the total listing price,
 room type, host status, amenities and location information which can be
 exploited to analyze these factors’ relation to the Airbnb prices. For
 more information see: <a href="https://www.kaggle.com/datasets/thedevastator/airbnb-price-determinants-in-europe?resource=download" class="uri">https://www.kaggle.com/datasets/thedevastator/airbnb-price-determinants-in-europe?resource=download</a></p>
-<p>Let’s start by importing our dataset:</p>
+<p>Let’s start by importing one part of our dataset and explore what we
+can do with it:</p>
 <pre class="r"><code>file_path &lt;- &quot;data/amsterdam_weekdays.csv&quot;
 amsterdam_weekday_data &lt;- read.csv(file_path, header = TRUE, sep = &quot;,&quot;, stringsAsFactors = FALSE)
 
@@ -598,14 +599,143 @@ summary(lm_model)</code></pre>
 ## Residual standard error: 326.4 on 1095 degrees of freedom
 ## Multiple R-squared:  0.3913, Adjusted R-squared:  0.3874 
 ## F-statistic: 100.6 on 7 and 1095 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code># Test the model on new data
-new_data &lt;- data.frame(person_capacity = 4, bedrooms = 2, attr_index_norm = 0.8, rest_index_norm = 0.6, guest_satisfaction_overall = 4.5, dist = 10, metro_dist = 5)
-predicted_realSum &lt;- predict(lm_model, newdata = new_data)
+<p>Since the linear model is inadequate with a low R squared. I chose to
+implement a random forest algorithm to see if I can find non-linear
+relationships between pricing and the explantory variables</p>
+<pre class="r"><code>library(randomForest)</code></pre>
+<pre><code>## randomForest 4.7-1.1</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre><code>## 
+## Attaching package: &#39;randomForest&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     combine</code></pre>
+<pre><code>## The following object is masked from &#39;package:ggplot2&#39;:
+## 
+##     margin</code></pre>
+<pre class="r"><code>#explanatory variables
+predictors &lt;- c(
+  &quot;room_shared&quot;,
+  &quot;room_private&quot;,
+  &quot;person_capacity&quot;,
+  &quot;host_is_superhost&quot;,
+  &quot;multi&quot;,
+  &quot;biz&quot;,
+  &quot;cleanliness_rating&quot;,
+  &quot;guest_satisfaction_overall&quot;,
+  &quot;bedrooms&quot;,
+  &quot;dist&quot;,
+  &quot;metro_dist&quot;,
+  &quot;attr_index&quot;,
+  &quot;attr_index_norm&quot;,
+  &quot;rest_index&quot;,
+  &quot;rest_index_norm&quot;,
+  &quot;lng&quot;,
+  &quot;lat&quot;
+)
 
-# Print the predicted realSum
-print(predicted_realSum)</code></pre>
-<pre><code>##         1 
-## -71.85879</code></pre>
+# Create a data frame with only the selected predictors and the target variable (price)
+data_subset &lt;- amsterdam_weekday_data[, c(predictors, &quot;realSum&quot;)]
+
+# Split the data into a training set and a testing set
+set.seed(123)  # for reproducibility
+sample_index &lt;- sample(1:nrow(data_subset), 0.7 * nrow(data_subset))
+train_data &lt;- data_subset[sample_index, ]
+test_data &lt;- data_subset[-sample_index, ]
+
+# Train the Random Forest model
+rf_model &lt;- randomForest(realSum ~ ., data = train_data, ntree = 500)
+
+# Make predictions on the test set
+predictions &lt;- predict(rf_model, test_data)
+
+# Evaluate the model (you can use different metrics like RMSE, MAE, etc.)
+library(caret)
+rmse &lt;- sqrt(mean((test_data$realSum - predictions)^2))
+mae &lt;- mean(abs(test_data$realSum - predictions))
+
+# Print the evaluation metrics
+print(paste(&quot;Root Mean Squared Error (RMSE):&quot;, rmse))</code></pre>
+<pre><code>## [1] &quot;Root Mean Squared Error (RMSE): 438.009947986847&quot;</code></pre>
+<pre class="r"><code>print(paste(&quot;Mean Absolute Error (MAE):&quot;, mae))</code></pre>
+<pre><code>## [1] &quot;Mean Absolute Error (MAE): 144.702289180843&quot;</code></pre>
+<p>Since these RMSE and MAE results are too high for us, let’s try to
+see if this works when we include data for weekends and the other
+cities:</p>
+<pre class="r"><code># Load the required libraries
+library(randomForest)
+library(caret)
+
+# Create an empty data frame to store the combined data
+combined_data &lt;- data.frame()
+
+# Define the list of cities and data types (weekdays and weekends)
+cities &lt;- c(&quot;amsterdam&quot;, &quot;athens&quot;, &quot;barcelona&quot;, &quot;berlin&quot;, &quot;budapest&quot;, &quot;lisbon&quot;, &quot;london&quot;, &quot;paris&quot;, &quot;rome&quot;, &quot;vienna&quot;)
+data_types &lt;- c(&quot;weekdays&quot;, &quot;weekends&quot;)
+
+# Loop through each city and data type
+for (city in cities) {
+  for (data_type in data_types) {
+    # Construct the file path for the CSV file
+    file_path &lt;- paste(&quot;data/&quot;, city, &quot;_&quot;, data_type, &quot;.csv&quot;, sep = &quot;&quot;)
+    
+    # Read the CSV file into a data frame
+    city_data &lt;- read.csv(file_path)
+    
+    # Create variables to identify the city and data type
+    city_data$city &lt;- city
+    city_data$data_type &lt;- data_type
+    
+    # Combine the data for the current city and data type with the overall data
+    combined_data &lt;- rbind(combined_data, city_data)
+  }
+}
+
+# Define your predictors (independent variables)
+predictors &lt;- c(
+  &quot;room_shared&quot;,
+  &quot;room_private&quot;,
+  &quot;person_capacity&quot;,
+  &quot;host_is_superhost&quot;,
+  &quot;multi&quot;,
+  &quot;biz&quot;,
+  &quot;cleanliness_rating&quot;,
+  &quot;guest_satisfaction_overall&quot;,
+  &quot;bedrooms&quot;,
+  &quot;dist&quot;,
+  &quot;metro_dist&quot;,
+  &quot;attr_index&quot;,
+  &quot;attr_index_norm&quot;,
+  &quot;rest_index&quot;,
+  &quot;rest_index_norm&quot;,
+  &quot;lng&quot;,
+  &quot;lat&quot;
+)
+
+# Create a data frame with only the selected predictors and the target variable (price)
+data_subset &lt;- combined_data[, c(predictors, &quot;realSum&quot;)]
+
+# Split the data into a training set and a testing set
+set.seed(123)  # for reproducibility
+sample_index &lt;- sample(1:nrow(data_subset), 0.7 * nrow(data_subset))
+train_data &lt;- data_subset[sample_index, ]
+test_data &lt;- data_subset[-sample_index, ]
+
+# Train the Random Forest model
+rf_model &lt;- randomForest(realSum ~ ., data = train_data, ntree = 500)
+
+# Make predictions on the test set
+predictions &lt;- predict(rf_model, test_data)
+
+# Evaluate the model
+rmse &lt;- sqrt(mean((test_data$realSum - predictions)^2))
+mae &lt;- mean(abs(test_data$realSum - predictions))
+
+# Print the evaluation metrics
+print(paste(&quot;Root Mean Squared Error (RMSE):&quot;, rmse))</code></pre>
+<pre><code>## [1] &quot;Root Mean Squared Error (RMSE): 245.974459183244&quot;</code></pre>
+<pre class="r"><code>print(paste(&quot;Mean Absolute Error (MAE):&quot;, mae))</code></pre>
+<pre><code>## [1] &quot;Mean Absolute Error (MAE): 58.3957196796319&quot;</code></pre>
 </div>
 
 
