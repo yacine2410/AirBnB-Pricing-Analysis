@@ -176,15 +176,6 @@ plot(predictions, residuals, xlab = "Predicted Price", ylab = "Residuals")
 abline(h = 0, col = "red")  # Add a horizontal line at zero for reference
 ```
 
-```{r K-Fold Cross-Validation}
-# Perform k-fold cross-validation
-library(caret)
-set.seed(123)  # for reproducibility
-cv <- trainControl(method = "cv", number = 10)  # 10-fold cross-validation
-model_cv <- train(realSum ~ ., data = train_data, method = "rf", trControl = cv)
-summary(model_cv)  # Print summary of cross-validation results
-```
-
 ```{r Feature Importance}
 # Visualize feature importance
 varImpPlot(rf_model)
