@@ -15,7 +15,7 @@ For my end of studies mini-senior project, I found a dataset containing Airbnb r
 
 We have data for several European cities for both weekdays & week-ends. So let's first begin by importing all the different data into one aggregate set:
 
-```{r Importation, echo = T, results = 'hide'}
+```{r importation, echo = T, results = 'hide'}
 # data frame for storing dataset
 combined_data <- data.frame()
 
@@ -44,14 +44,14 @@ for (city in cities) {
 
 Now let's check the top rows of the data to get an idea on what we're working with:
 
-```{r Head}
+```{r head}
 head(combined_data, 15)
 summary(combined_data)
 ```
 
 Now let's include the libraries we need to move forward: 
 
-```{r Libraries, echo = T, results = 'hide'}
+```{r libraries, echo = T, results = 'hide'}
 library(ggplot2)
 library(tidyr)
 library(randomForest)
@@ -68,7 +68,7 @@ library(grid)
 
 Let's do a data clean-up. I want to limit outliers by removing the rows with the highest and lowest 10% of listing price, turn our boolean text variables to integer binary variables, and create integer dummy variables for cities and for the listing being for weekends or weekdays.
 
-```{r clean-up & features, echo = T, results = 'hide'}
+```{r cleaning, echo = T, results = 'hide'}
 # Convert text variables to boolean integers
 combined_data$room_shared <- ifelse(combined_data$room_shared == "False", 0, 1)
 combined_data$room_private <- ifelse(combined_data$room_private == "False", 0, 1)
@@ -98,13 +98,13 @@ combined_data <- filtered_data
 
 Now let's summarize our transformed data
 
-```{r Filtered Data Summary}
+```{r summary}
 summary(combined_data)
 ```
 
 Now let's proceed with some basic exploratory data analysis just to get an idea on how the listing price varies
 
-```{r Exploratory Analysis}
+```{r exploratory_analysis}
 # Price histogram
 ggplot(combined_data, aes(x = realSum)) +
   geom_histogram(fill = "steelblue", bins = 30) +
@@ -140,7 +140,7 @@ We can see that the listing price isn't normally distributed. And we can also se
 
 Let's take a look at the number of listings per city in our sample
 
-```{r Colors, echo = T, results = 'hide'}
+```{r colors, echo = T, results = 'hide'}
 # Define the cities
 cities <- c("amsterdam", "athens", "barcelona", "berlin", "budapest", "lisbon", "london", "paris", "rome", "vienna")
 
@@ -152,28 +152,26 @@ color_palette <- brewer.pal(n_colors, "Set3")
 city_colors <- setNames(color_palette, cities)
 ```
 
-```{r Pie Chart}
-# Number of listings per city
+```{r pie}
+# Number of listings per city with numbers in the legend
 whole_dataset_pie <- original_data %>%
   group_by(city) %>%
   summarize(count = n()) %>%
   ggplot(aes(x = "", y = count, fill = city)) +
   geom_bar(stat = "identity", width = 1) +
+  geom_text(aes(label = count), position = position_stack(vjust = 0.5), size = 2.5, color = "black") +  # Add labels to the bars
   coord_polar(theta = "y") +
   scale_fill_manual(values = city_colors) +
   labs(title = "Number of Listings per City (Whole Dataset)") +
-  theme(
-    legend.position = "right",
-    plot.title = element_text(hjust = 0.5, margin = unit(c(0, 0, 20, 0), "pt"))
-  )
+  theme_void()  # Use theme_void to create a clear background
 
-# Print the pie chart
+# Print the pie chart with numbers in the legend
 print(whole_dataset_pie)
 ```
 
 Let's try looking at these on a map
 
-```{r Map}
+```{r map}
 # Create an sf object
 combined_sf <- st_as_sf(original_data, coords = c("lng", "lat"), crs = 4326)
 
@@ -219,7 +217,7 @@ m
 
 Let's proceed with a correlation matrix to get an idea on which explanatory variables correlate to the listing price, and also get an idea on the correlation between dependent variables.
 
-```{r Correlation Matrix}
+```{r correlation_matrix}
 # Correlation matrix
 cor_matrix <- cor(combined_data[, c("realSum", "person_capacity", "cleanliness_rating", "guest_satisfaction_overall", "bedrooms", "dist", "metro_dist", "rest_index", "attr_index", "rest_index_norm", "attr_index_norm", "lng", "lat", "biz", "host_is_superhost", "room_shared", "room_private", "for_weekends", "for_weekdays", "full_home", "multi")])
 
@@ -233,7 +231,7 @@ par(mar = c(1, 1, 1, 1))
 I chose to implement a random forest algorithm to see if I can find non-linear relationships between pricing and the exploratory variables, since a conventional linear regression did not work on our aggregate data. I first executed the RF algorithm using all the numerical explanatory variables, then using feature importance analysis to remove variables that didn't correlate, and then in cases of collinearities in the correlation matrix, removing the variable with the least score on the feature importance analysis.
 
 
-```{r Random Forest}
+```{r random_forest}
 # Independent variables
 predictors <- c(
   "lat",
@@ -270,7 +268,7 @@ cat("Mean Absolute Error (MAE):", mae, "\n")
 
 the RMSE & MAE are acceptable in comparison to our mean and median. So the model seems to be adequate
 
-```{r R Squared & MAPE}
+```{r rsquared_mape}
 # Calculate R-squared
 r_squared <- 1 - (sum((test_data$realSum - predictions)^2) / sum((test_data$realSum - mean(test_data$realSum))^2))
 print(paste("R-squared (R²):", r_squared))
@@ -282,7 +280,7 @@ print(paste("Mean Absolute Percentage Error (MAPE):", mape, "%"))
 
 And our R squared and MAPE values are acceptable, though they are not ideal.
 
-```{r Scatter Plot}
+```{r scatter_plot}
 # Compare observed values and predicted values
 plot(test_data$realSum, predictions, 
      xlab = "Observed Price",
@@ -297,7 +295,7 @@ abline(0, 1, col = "red")
 
 Let's take a look at the residuals plot to see if there is any pattern we can see in the error terms
 
-```{r Residual Plot}
+```{r residuals}
 # Calculate residuals
 residuals <- test_data$realSum - predictions
 
@@ -315,34 +313,43 @@ abline(h = 0, col = "red")
 
 Let's look into feature importance to see if we have any redundant explanatory variables
 
-```{r Feature Importance}
+```{r feature_importance}
 library(randomForest)
 library(caret)
-# Calculate variable importance
-variable_importance <- varImp(rf_model)
-
-# Convert variable importance to a data frame
-variable_importance_df <- as.data.frame(variable_importance)
-
-# Check the structure of the variable_importance_df data frame
-str(variable_importance_df)
-
-# Create a pie chart of feature importance if the Importance variable exists
-if ("Importance" %in% colnames(variable_importance_df)) {
-  pie_chart <- ggplot(variable_importance_df, aes(x = 1, y = Importance, fill = row.names(variable_importance_df))) +
-    geom_bar(stat = "identity", width = 1) +
-    coord_polar("y", start = 0) +
-    theme_void() +
-    labs(title = "Feature Importance")
-  
-  # Convert the pie chart to a standard plot object
-  pie_plot <- as.ggplot(pie_chart)
-  
-  # Display the pie plot
-  print(pie_plot)
-} else {
-  print("The 'Importance' variable is not present in the variable_importance_df data frame.")
-}
+# Create the feature importance plot
+importance <- importance(rf_model)
+varImpPlot(rf_model, pch = 19, col = "blue", bg = "white", main = "Feature Importance")
 ```
 
 In conclusion, in our samples there is considerable variance between cities in terms of listing prices. Our model shows this with the significant correlation of price with longitudes and latitudes, which incidentally was more correlated than the city dummy variables. The price is also correlated to the indexes relating to distance to restaurants and attractions, but since they are correlated to each other we only used one for the random forest model to prevent collinearity. And the same idea applies to the number of bedrooms and the distance to city centers.
+
+Let's perform K-fold cross-validation
+
+```{r cross_validation}
+# Create a data frame with only the selected predictors and the target variable (price)
+data_subset <- combined_data[, c(predictors, "realSum")]
+
+# Define the number of folds (K) for cross-validation
+num_folds <- 5  # You can adjust this as needed
+
+# Create a training control object for cross-validation
+train_control <- trainControl(
+  method = "cv",          # Use K-fold cross-validation
+  number = num_folds,     # Number of folds
+  verboseIter = TRUE      # Display progress
+)
+
+# Apply K-fold cross-validation to your existing rf_model
+set.seed(123)  # For reproducibility
+cv_results <- train(
+  realSum ~ .,             # Formula for the target variable
+  data = data_subset,     # Data frame
+  method = "rf",          # Random forest method
+  trControl = train_control,  # Training control
+  tuneGrid = data.frame(mtry = 3)  # Adjust mtry as needed
+)
+
+# Print the cross-validation results, including metrics
+print(cv_results)
+```
+As we can see the results of this test reinforce the initial testing of the random forest model.

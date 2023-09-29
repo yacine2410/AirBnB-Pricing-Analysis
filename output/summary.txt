@@ -1,0 +1,64 @@
+ 
+       X           realSum       room_type          room_shared      
+ Min.   :   0   Min.   :113.2   Length:41369       Min.   :0.000000  
+ 1st Qu.: 654   1st Qu.:160.4   Class :character   1st Qu.:0.000000  
+ Median :1365   Median :211.3   Mode  :character   Median :0.000000  
+ Mean   :1638   Mean   :234.8                      Mean   :0.005125  
+ 3rd Qu.:2415   3rd Qu.:289.4                      3rd Qu.:0.000000  
+ Max.   :5378   Max.   :500.8                      Max.   :1.000000  
+  room_private    person_capacity host_is_superhost     multi             biz        
+ Min.   :0.0000   Min.   :2.000   Min.   :0.0000    Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:0.0000   1st Qu.:2.000   1st Qu.:0.0000    1st Qu.:0.0000   1st Qu.:0.0000  
+ Median :0.0000   Median :3.000   Median :0.0000    Median :0.0000   Median :0.0000  
+ Mean   :0.3684   Mean   :3.103   Mean   :0.2636    Mean   :0.2926   Mean   :0.3476  
+ 3rd Qu.:1.0000   3rd Qu.:4.000   3rd Qu.:1.0000    3rd Qu.:1.0000   3rd Qu.:1.0000  
+ Max.   :1.0000   Max.   :6.000   Max.   :1.0000    Max.   :1.0000   Max.   :1.0000  
+ cleanliness_rating guest_satisfaction_overall    bedrooms          dist         
+ Min.   : 2.000     Min.   : 20.00             Min.   :0.000   Min.   : 0.03466  
+ 1st Qu.: 9.000     1st Qu.: 90.00             1st Qu.:1.000   1st Qu.: 1.42561  
+ Median :10.000     Median : 95.00             Median :1.000   Median : 2.63400  
+ Mean   : 9.407     Mean   : 92.73             Mean   :1.112   Mean   : 3.17955  
+ 3rd Qu.:10.000     3rd Qu.: 98.00             3rd Qu.:1.000   3rd Qu.: 4.28928  
+ Max.   :10.000     Max.   :100.00             Max.   :9.000   Max.   :25.28456  
+   metro_dist          attr_index      attr_index_norm      rest_index     
+ Min.   : 0.002301   Min.   :  15.15   Min.   :  0.9263   Min.   :  19.58  
+ 1st Qu.: 0.249888   1st Qu.: 143.33   1st Qu.:  6.7956   1st Qu.: 271.43  
+ Median : 0.414120   Median : 237.73   Median : 11.5968   Median : 534.31  
+ Mean   : 0.676397   Mean   : 296.63   Mean   : 13.1757   Mean   : 641.54  
+ 3rd Qu.: 0.734352   3rd Qu.: 382.28   3rd Qu.: 16.9250   3rd Qu.: 836.29  
+ Max.   :14.273577   Max.   :4513.56   Max.   :100.0000   Max.   :6696.16  
+ rest_index_norm         lng                lat            city          
+ Min.   :  0.6407   Min.   :-9.22634   Min.   :37.95   Length:41369      
+ 1st Qu.:  8.9507   1st Qu.:-0.07504   1st Qu.:41.41   Class :character  
+ Median : 18.3118   Median : 4.86326   Median :47.50   Mode  :character  
+ Mean   : 23.1876   Mean   : 7.17219   Mean   :45.62                     
+ 3rd Qu.: 33.5754   3rd Qu.:13.44577   3rd Qu.:51.45                     
+ Max.   :100.0000   Max.   :23.78602   Max.   :52.64                     
+  data_type          for_weekends     for_weekdays      full_home     
+ Length:41369       Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+ Class :character   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000  
+ Mode  :character   Median :1.0000   Median :0.0000   Median :1.0000  
+                    Mean   :0.5068   Mean   :0.4932   Mean   :0.6316  
+                    3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:1.0000  
+                    Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+   amsterdam           athens          barcelona           berlin       
+ Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.00000  
+ 1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000  
+ Median :0.00000   Median :0.00000   Median :0.00000   Median :0.00000  
+ Mean   :0.02826   Mean   :0.07994   Mean   :0.05777   Mean   :0.05248  
+ 3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000  
+ Max.   :1.00000   Max.   :1.00000   Max.   :1.00000   Max.   :1.00000  
+    budapest           lisbon           london           paris       
+ Min.   :0.00000   Min.   :0.0000   Min.   :0.0000   Min.   :0.0000  
+ 1st Qu.:0.00000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.0000  
+ Median :0.00000   Median :0.0000   Median :0.0000   Median :0.0000  
+ Mean   :0.07982   Mean   :0.1228   Mean   :0.1849   Mean   :0.1274  
+ 3rd Qu.:0.00000   3rd Qu.:0.0000   3rd Qu.:0.0000   3rd Qu.:0.0000  
+ Max.   :1.00000   Max.   :1.0000   Max.   :1.0000   Max.   :1.0000  
+      rome            vienna       
+ Min.   :0.0000   Min.   :0.00000  
+ 1st Qu.:0.0000   1st Qu.:0.00000  
+ Median :0.0000   Median :0.00000  
+ Mean   :0.1882   Mean   :0.07842  
+ 3rd Qu.:0.0000   3rd Qu.:0.00000  
+ Max.   :1.0000   Max.   :1.00000
